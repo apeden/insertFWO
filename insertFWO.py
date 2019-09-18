@@ -2,7 +2,7 @@ from openpyxl import load_workbook as load
 import csv
 
 workbook = "../2019/Gift Aid Analysis 2019.xlsx"
-sheet_name = "directDebit"
+#sheet_name = "directDebit"
 csv_file = "../2019/AlexForExport13_09_19"
 
 try:
@@ -11,13 +11,13 @@ except PermissionError:
     print("You currently have the excel workbook open")
     raise
 
-sheet = wb[sheet_name]
+#sheet = wb[sheet_name]
 cashNames = "glen", "wood"
 
 def insertDD(sheet, csv_file, cashNames):
     with open(csv_file+".csv") as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
-        #goes down list of names in csv file
+        #goes down csv file row by row
         for row in csv_reader:
             j = 0
             while j <= 82:
@@ -42,5 +42,30 @@ def insertDD(sheet, csv_file, cashNames):
                     break
                 j += 1
     wb.save("Gift Aid Analysis 2019 FWO copy.xlsx")
-    
-insertDD(sheet, csv_file, cashNames)
+
+
+def insertCash(sheet, csv_file):
+    with open(csv_file+".csv") as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        #goes down csv file row by row
+        for row in csv_reader:
+            for i in range(55):
+                code = str(sheet.cell(column = (6 + i), row = 1).value)
+                if code == str(row[12]):
+                    
+                    cash = float(row[14])
+                    #existing amount in the distination cell
+                    currCellValue = 0.0
+                    valStr = (str
+                              (sheet.cell
+                               (column = (6 + i), row = 92).value))
+                    if valStr != "None":
+                        currCellValue = float(valStr)
+                    #adds amount to existing amount in appropriate cell
+                    sheet.cell(column =(6 + i),
+                              row = 92,
+                              value = (cash + currCellValue))
+                
+    wb.save("Gift Aid Analysis 2019 CASH copy.xlsx")
+
+insertCash(wb["envelopes"], csv_file)
